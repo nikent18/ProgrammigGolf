@@ -10,11 +10,8 @@ public class CPPCompilation {
 
        CPPCompilation obj = new CPPCompilation();
 
-        //работает вызов help
-        String command = "cmd /c C:/MinGW/bin/g++.exe --help";
 
-        //файл не создается, но ошибок никаких нет
-        // String command = "cmd /c C:/MinGW/bin/g++.exe D:/tests/main.cpp -o D:/o.exe ";
+        String command = "C:/MinGW/bin/g++.exe D:/tests/main.cpp -o D:/tests/o.exe";
         String output = obj.executeCommand(command);
 
         System.out.println(output);
