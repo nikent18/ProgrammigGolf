@@ -14,5 +14,9 @@
                 <root id="test.src.dir" name="Тесты"/>
             </test-roots>
         </data>
+        <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>http</word>
+            <word>servlet</word>
+        </spellchecker-wordlist>
     </configuration>
 </project>
