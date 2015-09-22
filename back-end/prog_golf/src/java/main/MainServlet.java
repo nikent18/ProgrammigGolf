@@ -52,7 +52,7 @@ public class MainServlet extends HttpServlet{
         pw.println("</title>");
         pw.println("</head>");
         pw.println("<body>");
-        pw.println("Code in file: " + file.getFileName());
+        pw.println("Code in file: " + file.getFullFileName());
         pw.println("<br>");
         pw.println("User: " + id_user);
         pw.println("<br>");
@@ -62,10 +62,11 @@ public class MainServlet extends HttpServlet{
         pw.println("<br>");
         pw.println("Language: " + lang);
         pw.println("<br>");
+        pw.println("Log: ");
         if(log.isEmpty())
             pw.println("Compile done!");
         else
-            pw.println("Log: " + log);
+            pw.println(log);
         pw.println("</body>");
         pw.println("</html>");
     }
