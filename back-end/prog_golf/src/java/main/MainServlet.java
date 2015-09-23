@@ -1,5 +1,6 @@
 package main;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -40,7 +41,23 @@ public class MainServlet extends HttpServlet{
         res.setContentType("text/html;charset=utf-8");
         
         // Create program file
-        FileWorker file = new FileWorker(code, lang, id_user, id_task);
+        FileWorker file;
+        try {
+            file = new FileWorker(code, lang, id_user, id_task);
+        } catch (IOException ex) {
+            PrintWriter pw = res.getWriter();
+            pw.println("<html>");
+            pw.println("<head>");
+            pw.println("<title>");
+            pw.println("Programming Golf");
+            pw.println("</title>");
+            pw.println("</head>");
+            pw.println("<body>");
+            pw.println("Error! Can't create/find program file on server side");
+            pw.println("</body>");
+            pw.println("</html>");
+            return;
+        }
         String log = file.compileFile();
         
         // generate new HTML page as a response

@@ -2,7 +2,6 @@ package main;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -32,9 +31,11 @@ public class FileWorker {
      * @param lang programming language
      * @param id_user user identifier
      * @param id_task task identifier
+     * @throws java.io.IOException if can't create/find program file
+     * @throws java.io.FileNotFoundException if can't find created file
      */
-    public FileWorker(String code, final String lang, 
-            final String id_user, final String id_task) {
+    public FileWorker(String code, String lang, String id_user, String id_task) 
+            throws IOException {
         
         // path for file storage
         this.filePath = "C:/";
@@ -52,18 +53,11 @@ public class FileWorker {
         
         // create file
         File file = new File(fullFileName);
-        try {
-            file.createNewFile();
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+        file.createNewFile();
         
         // write code in file
         try (PrintWriter pw = new PrintWriter(file.getAbsoluteFile())) {
             pw.print(code);
-            pw.close();
-        } catch (FileNotFoundException ex) {
-            System.out.println("Error: File " + fullFileName + " is not found.");
         }
     }
     
@@ -135,7 +129,7 @@ public class FileWorker {
      * @param command command to execute
      * @return log of the running process
      */
-    private String execCommand(final String command) {
+    private String execCommand(String command) {
         
         // log of compiler / interpreter
         StringBuilder output = new StringBuilder();
@@ -203,6 +197,9 @@ public class FileWorker {
         
         // object for parsing of string
         StringTokenizer st = new StringTokenizer(code);
+        
+        // checking the number of words in code
+        // should be made on the client side !?
         
         // search class name
         while(!st.nextToken().equals("class")) ;
