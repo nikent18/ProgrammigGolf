@@ -1,6 +1,5 @@
 package main;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -58,7 +57,25 @@ public class MainServlet extends HttpServlet{
             pw.println("</html>");
             return;
         }
-        String log = file.compileFile();
+        
+        // compile file
+        String log;
+        try {
+            log = file.compileFile();
+        } catch (InterruptedException | IOException ex) {
+            PrintWriter pw = res.getWriter();
+            pw.println("<html>");
+            pw.println("<head>");
+            pw.println("<title>");
+            pw.println("Programming Golf");
+            pw.println("</title>");
+            pw.println("</head>");
+            pw.println("<body>");
+            pw.println("Error! Problem of compiling of program file.");
+            pw.println("</body>");
+            pw.println("</html>");
+            return;
+        }
         
         // generate new HTML page as a response
         PrintWriter pw = res.getWriter();

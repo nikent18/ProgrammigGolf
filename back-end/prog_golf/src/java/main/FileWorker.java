@@ -24,6 +24,9 @@ public class FileWorker {
     // programming language
     private final String language;
     
+    // object of DBWorker class (for get some info about compilers, etc.)
+    private final DBWorker db;
+    
     /**
      * Constructor of the class FileWorker (create file with code).
      * Name of created file consisting of user ID and task ID.
@@ -32,20 +35,23 @@ public class FileWorker {
      * @param id_user user identifier
      * @param id_task task identifier
      * @throws java.io.IOException if can't create/find program file
-     * @throws java.io.FileNotFoundException if can't find created file
      */
     public FileWorker(String code, String lang, String id_user, String id_task) 
             throws IOException {
         
+        // connect with database
+        db = new DBWorker();
+                
         // path for file storage
-        this.filePath = "C:/";
+        filePath = "C:/";
         
         // programming language
         language = lang;
         
         // create file name
         shortFileName = id_user + "_" + id_task;
-        fullFileName = filePath + id_user + "_" + id_task + this.fileExtansion();
+        fullFileName = filePath + id_user + "_" + id_task + 
+                db.getCompFileExtension(lang);
         
         // change class name for java file
         if(language.equals("Java"))
@@ -78,113 +84,68 @@ public class FileWorker {
     }
     
     /**
-     * Function for determine the file extension by programming language.
-     * @return file extension
-     */
-    private String fileExtansion() {
-        switch (language) {
-            case "C" : return ".c";
-            case "C++" : return ".cpp";
-            case "Java" : return ".java";
-        }
-        return "";
-    }
-    
-    /**
      * Function for compile program file.
      * @return log of compiler / interpreter
+     * @throws java.io.IOException
+     * @throws java.lang.InterruptedException
      */
-    public String compileFile() {
-        
-        // log of compiler / interpreter
-        String output = new String();
-        
-        // name of compiler / interpreter (with path)
-        String compiler = this.compPath();
-        
-        // name of executable file
-        String execFile;
+    public String compileFile() throws IOException, InterruptedException {
         
         // executable command
-        String command;
+        String command = db.getCompilerPath(language) + " " +
+                fullFileName + " " + 
+                db.getCompilerOptions(language) + " " +
+                db.getExecFileName(language, filePath, shortFileName);
         
-        // compile / interpret
-        switch(language) {
-            case "C" : case "C++" :
-                execFile = filePath + shortFileName + ".exe";
-                command = compiler + " " + fullFileName + " " + "-o" + execFile;
-                output = execCommand(command);
-                break;
-            case "Java" :
-                command = compiler + " " + fullFileName;
-                output = execCommand(command);
-                break;
-        }
-        
-        return output;
+        // compile / interpret and return log
+        return execCommand(command);
     }
     
     /**
      * Function for execute task in command line.
      * @param command command to execute
      * @return log of the running process
+     * @throws java.io.IOException
+     * @throws java.lang.InterruptedException
      */
-    private String execCommand(String command) {
+    private String execCommand(String command) throws 
+            IOException, InterruptedException {
         
         // log of compiler / interpreter
         StringBuilder output = new StringBuilder();
 
-        try {
-            // compiling
-            Process p = Runtime.getRuntime().exec(command);
-            
-            // wait for completion of the process
-            p.waitFor();
-            
-            // output stream of compiler
-            BufferedReader log;
-            log = new BufferedReader(
-                    new InputStreamReader(p.getInputStream()));
-            
-            // error stream of compiler
-            BufferedReader errLog; 
-            errLog = new BufferedReader(
-                    new InputStreamReader(p.getErrorStream(), "Cp866"));
-            
-            // print output log
-            String line;
-            while ((line = log.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-            
-            // print error log
-            while ((line = errLog.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-            
-            //close streams
-            log.close();
-            errLog.close();
-            
-        } catch (IOException | InterruptedException ex) {
-            throw new RuntimeException(ex);
+        // compiling
+        Process p = Runtime.getRuntime().exec(command);
+
+        // wait for completion of the process
+        p.waitFor();
+
+        // output stream of compiler
+        BufferedReader log;
+        log = new BufferedReader(
+                new InputStreamReader(p.getInputStream()));
+
+        // error stream of compiler
+        BufferedReader errLog; 
+        errLog = new BufferedReader(
+                new InputStreamReader(p.getErrorStream(), "Cp866"));
+
+        // print output log
+        String line;
+        while ((line = log.readLine()) != null) {
+            output.append(line).append("\n");
         }
 
-        return output.toString();
-    }
-    
-    /**
-     * Function for determine the path to compiler by programming language.
-     * @return compiler's name (with path)
-     */
-    private String compPath() {
-        switch (language) {
-            case "C" : case "C++" :
-                return "C:/MinGW/bin/gcc.exe";
-            case "Java" :
-                return "C:/Program Files/Java/jdk1.8.0_60/bin/javac.exe";
+        // print error log
+        while ((line = errLog.readLine()) != null) {
+            output.append(line).append("\n");
         }
-        return "";
+
+        //close streams
+        log.close();
+        errLog.close();
+
+        return output.toString();
     }
     
     /**
@@ -210,7 +171,6 @@ public class FileWorker {
         
         // change class name with short file name
         return code.replace(className, shortFileName);
-        
     }
     
 }
