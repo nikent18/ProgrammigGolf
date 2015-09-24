@@ -1,7 +1,9 @@
 package main;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -39,22 +41,19 @@ public class MainServlet extends HttpServlet{
         // determine character encoding specification
         res.setContentType("text/html;charset=utf-8");
         
-        // Create program file
+        // prepare response message for client
+        Map<String, String> respFromServer = new HashMap<>();
+        req.setAttribute("response", respFromServer);
+        
+        // create program file
         FileWorker file;
         try {
             file = new FileWorker(code, lang, id_user, id_task);
         } catch (IOException ex) {
-            PrintWriter pw = res.getWriter();
-            pw.println("<html>");
-            pw.println("<head>");
-            pw.println("<title>");
-            pw.println("Programming Golf");
-            pw.println("</title>");
-            pw.println("</head>");
-            pw.println("<body>");
-            pw.println("Error! Can't create/find program file on server side");
-            pw.println("</body>");
-            pw.println("</html>");
+            // create response message for client
+            respFromServer.put("log", "Error! Can't create/find program file on server side");
+            // forward request to basic page
+            forwardResToClient(req, res);
             return;
         }
         
@@ -63,46 +62,41 @@ public class MainServlet extends HttpServlet{
         try {
             log = file.compileFile();
         } catch (InterruptedException | IOException ex) {
-            PrintWriter pw = res.getWriter();
-            pw.println("<html>");
-            pw.println("<head>");
-            pw.println("<title>");
-            pw.println("Programming Golf");
-            pw.println("</title>");
-            pw.println("</head>");
-            pw.println("<body>");
-            pw.println("Error! Problem of compiling of program file.");
-            pw.println("</body>");
-            pw.println("</html>");
+            // create response message for client
+            respFromServer.put("log", "Error! Unknown problem of compiling of program file.");
+            // forward request to basic page
+            forwardResToClient(req, res);
             return;
         }
-        
-        // generate new HTML page as a response
-        PrintWriter pw = res.getWriter();
-        pw.println("<html>");
-        pw.println("<head>");
-        pw.println("<title>");
-        pw.println("Programming Golf");
-        pw.println("</title>");
-        pw.println("</head>");
-        pw.println("<body>");
-        pw.println("Code in file: " + file.getFullFileName());
-        pw.println("<br>");
-        pw.println("User: " + id_user);
-        pw.println("<br>");
-        pw.println("Task: " + id_task);
-        pw.println("<br>");
-        pw.println("Symbols in code: " + code.length());
-        pw.println("<br>");
-        pw.println("Language: " + lang);
-        pw.println("<br>");
-        pw.println("Log: ");
+                
+        // create response message for client
+        respFromServer.put("filename", file.getFullFileName());
+        respFromServer.put("lang", lang);
+        respFromServer.put("symb", String.valueOf(code.length()));
         if(log.isEmpty())
-            pw.println("Compile done!");
+            respFromServer.put("log", "Compile done!");
         else
-            pw.println(log);
-        pw.println("</body>");
-        pw.println("</html>");
+            respFromServer.put("log", log);
+        
+        // forward request to basic page
+        forwardResToClient(req, res);
+        
+    }
+    
+    /**
+     * Function to forward response to basic page.
+     * @param req an HttpServletRequest object that contains the request the client has made of the servlet
+     * @param res an HttpServletResponse object that contains the response the servlet sends to the client 
+     * @throws javax.servlet.ServletException if the request for the POST could not be handled
+     * @throws java.io.IOException if an input or output error is detected when the servlet handles the request 
+     */
+    private void forwardResToClient(HttpServletRequest req, HttpServletResponse res) 
+            throws IOException, ServletException {
+        RequestDispatcher rd = req.getRequestDispatcher("index.jsp");
+        if(rd != null)
+            rd.forward(req, res);
+        else
+            res.sendError(HttpServletResponse.SC_NO_CONTENT);
     }
     
 }
