@@ -40,8 +40,42 @@ public class MainServlet extends HttpServlet{
         res.setContentType("text/html;charset=utf-8");
         
         // Create program file
-        FileWorker file = new FileWorker(code, lang, id_user, id_task);
-        String log = file.compileFile();
+        FileWorker file;
+        try {
+            file = new FileWorker(code, lang, id_user, id_task);
+        } catch (IOException ex) {
+            PrintWriter pw = res.getWriter();
+            pw.println("<html>");
+            pw.println("<head>");
+            pw.println("<title>");
+            pw.println("Programming Golf");
+            pw.println("</title>");
+            pw.println("</head>");
+            pw.println("<body>");
+            pw.println("Error! Can't create/find program file on server side");
+            pw.println("</body>");
+            pw.println("</html>");
+            return;
+        }
+        
+        // compile file
+        String log;
+        try {
+            log = file.compileFile();
+        } catch (InterruptedException | IOException ex) {
+            PrintWriter pw = res.getWriter();
+            pw.println("<html>");
+            pw.println("<head>");
+            pw.println("<title>");
+            pw.println("Programming Golf");
+            pw.println("</title>");
+            pw.println("</head>");
+            pw.println("<body>");
+            pw.println("Error! Problem of compiling of program file.");
+            pw.println("</body>");
+            pw.println("</html>");
+            return;
+        }
         
         // generate new HTML page as a response
         PrintWriter pw = res.getWriter();
