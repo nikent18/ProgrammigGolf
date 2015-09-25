@@ -25,8 +25,10 @@ public class DBWorker {
         
         // temporary code:
         switch (lang) {
-            case "C" : case "C++" :
+            case "C" :
                 return "C:/MinGW/bin/gcc.exe";
+            case "C++":
+                return "C:/MinGW/bin/g++.exe";
             case "Java" :
                 return "C:/Program Files/Java/jdk1.8.0_60/bin/javac.exe";
         }
